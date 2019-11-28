@@ -2,6 +2,9 @@ import matplotlib.pyplot as plot
 import numpy as np
 import wave
 
+QUIET_TIME = 0.2
+INTERRUPTION_TIME = 0
+
 
 def print_plot(data, frame_rate_in):
     record_time = np.linspace(0, len(data) / frame_rate_in, num=len(data))
@@ -30,16 +33,30 @@ def write_wave_file(name, content, f_rate, n_channels, s_width):
         file_out.writeframes(content)
 
 
-def cut_noises(content_in):
+def cut_noises(content_in, quiet_const):
     content_out = []
+    content_part = []
+    quiet_actual = 0
     for sample in content_in:
-        if 0 < abs(sample) < 3000:
-            content_out.append(sample)
+        content_part.append(sample)
+        if 300 < abs(sample) < 3000:
+            if quiet_actual > quiet_const:
+                content_part.clear()
+            quiet_actual = 0
+            content_part.append(sample)
+            content_out += content_part
+            content_part.clear()
+        else:
+            quiet_actual += 1
     content_out = np.array(content_out)
     return content_out
 
 
 data_in, FRAME_RATE, CHANNELS, SAMPLE_WIDTH = read_wave_file("sample.wav")
-data_out = cut_noises(data_in)
+QUIET_SAMPLES = QUIET_TIME * FRAME_RATE
+print("FRAME RATE: " + str(FRAME_RATE))
+print("SAMPLES LENGTH: " + str(QUIET_SAMPLES))
+
+data_out = cut_noises(data_in, QUIET_SAMPLES)
 write_wave_file("output.wav", data_out, FRAME_RATE, CHANNELS, SAMPLE_WIDTH)
 print_plot(data_out, FRAME_RATE)
