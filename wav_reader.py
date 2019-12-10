@@ -36,27 +36,27 @@ def write_wave_file(name, content, f_rate, n_channels, s_width):
 def cut_noises(content_in, quiet_const):
     content_out = []
     content_part = []
-    quiet_actual = 0
     for sample in content_in:
-        content_part.append(sample)
-        if 300 < abs(sample) < 3000:
-            if quiet_actual > quiet_const:
-                content_part.clear()
-            quiet_actual = 0
-            content_part.append(sample)
-            content_out += content_part
+        if 0 < abs(sample) < 3000:
+            if len(content_part) < quiet_const:
+                # print("len = " + str(len(content_part)))
+                # print("exp = " + str(quiet_const))
+                content_out += content_part
             content_part.clear()
+            content_out.append(sample)
         else:
-            quiet_actual += 1
+            content_part.append(sample)
     content_out = np.array(content_out)
+    print(str(len(content_part)))
+    print(str(quiet_const))
     return content_out
 
 
-data_in, FRAME_RATE, CHANNELS, SAMPLE_WIDTH = read_wave_file("sample.wav")
+data_in, FRAME_RATE, CHANNELS, SAMPLE_WIDTH = read_wave_file("sample_channel1.wav")
 QUIET_SAMPLES = QUIET_TIME * FRAME_RATE
 print("FRAME RATE: " + str(FRAME_RATE))
 print("SAMPLES LENGTH: " + str(QUIET_SAMPLES))
 
 data_out = cut_noises(data_in, QUIET_SAMPLES)
-write_wave_file("output.wav", data_out, FRAME_RATE, CHANNELS, SAMPLE_WIDTH)
+write_wave_file("output1.wav", data_out, FRAME_RATE, CHANNELS, SAMPLE_WIDTH)
 print_plot(data_out, FRAME_RATE)
