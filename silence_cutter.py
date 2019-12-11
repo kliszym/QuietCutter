@@ -46,6 +46,10 @@ def find_highest_index(in_array):
     return maxim["index2"]
 
 
+def check_range():
+    pass
+
+
 samples_rate, samples = wav.read(filename="sample_small.wav", mmap=True)
 samples_max = np.iinfo(samples.dtype).max
 
